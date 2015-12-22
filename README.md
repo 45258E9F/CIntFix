@@ -20,6 +20,7 @@ cpp (C preprocessor, version 5.2.1 is tested)
 Build
 ------
 **1.** compile java files into `.class` files
+
 **2.** compile `intfixtoolkit.c` into `libintfixtoolkit.so` for linking
 
     $ gcc -shared -o libintfixtoolkit.so -fPIC hello.c -lgmp
