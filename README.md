@@ -20,10 +20,6 @@ cpp (C preprocessor, version 5.2.1 is tested)
 Build
 ------
 **1.** compile java files into `.class` files
-
-**2.** compile `intfixtoolkit.c` into `libintfixtoolkit.so` for linking
-
-    $ gcc -shared -o libintfixtoolkit.so -fPIC hello.c -lgmp
     
 
 Run Guide
@@ -40,7 +36,7 @@ Notice that you should specify correct include files or folders for correct anal
   
   For a C file `code.c`, the name of fixed file is `code.hp.c` while the original one keeps. You can choose to replace the new file with the original one.
   
-**3.** Compile the new program with linking to `libintfixtoolkit.so` or adding `intfixtoolkit.h` into existing project.
+**3.** Compile the new program with `intfixtoolkit.c` and `intfixtoolkit.h` into existing project.
 
 **4.** Enjoy the fixed program now!
 
