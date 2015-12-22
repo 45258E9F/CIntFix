@@ -3,13 +3,15 @@ A tool to fix C integer errors by automatic precision improvement
 
 Introduction
 -------------
-CIntFix is a tool to automatically fix C integer errors (including overflow, underflow, sign conversion and lossy truncation) by elevating precision of bounded program integers. Since the nature of integer errors is the inconsistency of fixed-length bit-vector logic and mathematical integer logic, our tool can solve most of common errors, with acceptable loss of runtime efficiency. CIntFix depends CDT to parse C source code and GMP library(https://gmplib.org) to support multi-precision integer arithmetic.
+CIntFix is a tool to automatically fix C integer errors (including overflow, underflow, sign conversion and lossy truncation) by elevating precision of bounded program integers. Since the nature of integer errors is the inconsistency of fixed-length bit-vector logic and mathematical integer logic, our tool can solve most of common errors, with acceptable loss of runtime efficiency. CIntFix depends Eclipse CDT (https://eclipse.org/cdt/) to parse C source code and GMP library (https://gmplib.org) to support multi-precision integer arithmetic.
 
 CIntFix is also the prototype tool of the paper "Automatic Fix for C Integer Errors by Precision Improvement".
 
 Requirements
 --------------
 OS: Linux distributions
+
+Eclipse CDT (version 8.8 is tested)
 
 libgmp (You can install it from source code or software repositories, GMP 6.0.0 and later is recommanded)
 
