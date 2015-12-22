@@ -5,13 +5,18 @@ import java.io.File;
 public class IntErrorFix {
 	
 	// fields below are given by program arguments, in the future
-	private static String rewriteJSON = "/home/cxcfan/Research/IntFix/report.json"; 
-	private static String inputFolder = "/home/cxcfan/Research/IntFix/Benchmark/Juliet/testcases/CWE194_Unexpected_Sign_Extension/s02";
-			//"/home/cxcfan/dev/quad/";
+	private static String inputFolder = "";
 			//"/home/cxcfan/Research/IntFix/Benchmark/Juliet/testcases/CWE195_Signed_to_Unsigned_Conversion_Error/s01";
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		
+		// process program parameter
+		if(args.length != 1) {
+			System.err.println("Usage: java IntErrorFix [Path of folder containing C files]");
+			return;
+		}
+		inputFolder = args[0];
 		
 		// STEP 1: pre-processing input C file
 		//PreprocessFactory preFactory = new PreprocessFactory(rewriteJSON);
