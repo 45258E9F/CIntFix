@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <limits.h>
-#include <gmp.h>
+#include "intfixtoolkit.h"
 
 unsigned int __CHECK_GMP_UINT(mpz_t op)
 {
