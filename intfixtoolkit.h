@@ -1,8 +1,14 @@
+#ifndef _INTFIX_TOOLKIT_H_
+#define _INTFIX_TOOLKIT_H_
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <limits.h>
 #include <gmp.h>
+
+#define DIRTY_VALUE 20
+#define PRESSURE_TEST
 
 unsigned int __CHECK_GMP_UINT(mpz_t op);
 int __CHECK_GMP_INT(mpz_t op);
@@ -29,3 +35,5 @@ void __CHECK_POINTER_MINUS_SL(unsigned long int base, long int offset);
 
 int __CALC_BRANCH_HASH(int n, ...);
 void __CINTFIX_ERROR(const char * errmsg);
+
+#endif
