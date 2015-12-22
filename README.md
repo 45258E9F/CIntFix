@@ -36,7 +36,7 @@ Notice that you should specify correct include files or folders for correct anal
   
   For a C file `code.c`, the name of fixed file is `code.hp.c` while the original one keeps. You can choose to replace the new file with the original one.
   
-**3.** Compile the new program with `intfixtoolkit.c` and `intfixtoolkit.h` into existing project.
+**3.** Compile the new program with `intfixtoolkit.c` and `intfixtoolkit.h` in the project.
 
 **4.** Enjoy the fixed program now!
 
