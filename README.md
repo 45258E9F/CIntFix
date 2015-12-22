@@ -10,8 +10,12 @@ CIntFix is also the prototype tool of the paper "Automatic Fix for C Integer Err
 Requirements
 --------------
 OS: Linux distributions
+
 libgmp (You can install it from source code or software repositories, GMP 6.0.0 and later is recommanded)
-gcc (gcc 5.2.1 is tested) or clang (clang 3.6.2 is tested), cpp (C preprocessor, version 5.2.1 is tested)
+
+gcc (gcc 5.2.1 is tested) or clang (clang 3.6.2 is tested)
+
+cpp (C preprocessor, version 5.2.1 is tested)
 
 Build
 ------
