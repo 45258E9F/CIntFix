@@ -274,13 +274,8 @@ public class PrecisionImprovementFactory {
 			// Theoretically, one AST node is belong to one file.
 			String containFile = preprocessor.getContainingFile(startLn);
 			
-			// FIXME: we should fix this pattern, since there could be some useful info such as typedef
-			// **NOTE: if this flag is false, we should skip this line
-			
-			// FIXME: containFile can be a relative path, thus the following statement will lead to generation of empty file
 			dontSkip = (containFile.equals(inputCFile) || inputCFile.endsWith(containFile));
 			
-			// FIXME: we need to change the policy here so that each function definition can be processed independently
 			if(topNode instanceof IASTFunctionDefinition) {
 				if(!dontSkip) {
 					continue;
@@ -288,7 +283,7 @@ public class PrecisionImprovementFactory {
 				String convertedCode = convertToGMP(topNode, typeAlias, liftedVars);
 				outputCode.add(convertedCode);
 			} else if(topNode instanceof IASTSimpleDeclaration) {
-				// FIXME: we decide to keep global variable declarations for several reasons:
+				// we decide to keep global variable declarations for several reasons:
 				// (1) it is a bad program design to use many global variables and modify them in multiple functions
 				// (2) it is infeasible to simply replace global integer declaration with GMP version. We can initialize them in the top of main function, but we can
 				//     get to know all global variables until we scan all C files
@@ -325,7 +320,7 @@ public class PrecisionImprovementFactory {
 		}
 		bout.flush();
 		
-		// FIXME: add two include files if necessary: (1) gmp.h; (2) intfixtoolkit.h
+		// add two include files if necessary: (1) gmp.h; (2) intfixtoolkit.h
 		for(String extraInclude : extraIncludes) {
 			if(!preprocessor.includeFileExists(extraInclude)) {
 				bout.write(extraInclude);
@@ -385,7 +380,7 @@ public class PrecisionImprovementFactory {
 		 * 
 		 */
 		
-		// FIXME: immediate variables can be created and used inside function definition. An instance cannot be accessed by multiple functions in the program!
+		// intermediate variables can be created and used inside function definition. An instance cannot be accessed by multiple functions in the program!
 		// That means, we have to maintain variable creation and destruction in every function!! 
 		
 		String newFuncDef = "";
@@ -393,7 +388,7 @@ public class PrecisionImprovementFactory {
 		
 		// STEP 1: copy the global alias list for analyzing function body since some of them could be overwritten!!
 		// **NOTE: List of type alias consists of global info, but list of lifted variables does not.
-		// FIXME: type alias and lifted variables are scope-relevant
+		// type alias and lifted variables are scope-relevant
 		
 		// STEP 2: generate the signature of this function, which is consistent with the original
 		IASTDeclSpecifier funcSpecifier = funcNode.getDeclSpecifier();
@@ -401,8 +396,8 @@ public class PrecisionImprovementFactory {
 		IASTStatement funcBody = funcNode.getBody();
 		String funcSig = funcSpecifier.getRawSignature() + " " + funcDeclarator.getRawSignature();
 		
-		// FIXME: to support type check in return statement, we store function declaration info in global
-		//        for every call of this function, the specifier should be updated
+		// to support type check in return statement, we store function declaration info in global
+		// for every call of this function, the specifier should be updated
 		visiting = funcNode;
 		
 		// Although unnecessary, we set 'nobrace' to its default value
@@ -528,7 +523,7 @@ public class PrecisionImprovementFactory {
 		/*
 		 * Before return from this function, we should carefully check the return expression to see if its value overflows
 		 * 
-		 * FIXME: by executing return statement, we will exit from this function, thus all GMP variables should be destroyed manually
+		 * by executing return statement, we will exit from this function, thus all GMP variables should be destroyed manually
 		 *        (1) temporary variables of lists in stack are disjoint;
 		 *        (2) it is possible that we cannot clear the memory of all local variables completely because of duplicated variable names. 
 		 */
@@ -554,7 +549,7 @@ public class PrecisionImprovementFactory {
 			int slength = specInfo.getFirst();
 			boolean ssign = specInfo.getSecond();
 			
-			// FIXME: we need to create another temporary variable (of internal integer type) for return variable in order to
+			// we need to create another temporary variable (of internal integer type) for return variable in order to
 			//        completely release memory (otherwise memory leak will occur).
 			String retVarName = String.format(ret_prefix, funcDecl.getName().toString());
 			
@@ -568,7 +563,7 @@ public class PrecisionImprovementFactory {
 					// then we can confirm that the return type is purely numerical
 					// SECOND, assert check to guarantee that the return value precisely matches the return type of function
 
-					// FIXME: how about the return expression is a GMP integer?
+					// how about the return expression is a GMP integer?
 					if(isHighPrecisionVar(retValName, tempVarTable, liftedVars)) {
 						if(ssign) {
 							// signed
@@ -779,7 +774,7 @@ public class PrecisionImprovementFactory {
 		
 		newCode = newCode.concat(indentStr).concat("do {\n");
 		
-		// TODO: backup here
+		// backup here
 		Set<String> localVariablesBK = new HashSet<>();
 		Set<String> tempVarInScopeBK = new HashSet<>();
 		Map<String, String> typeAliasBK = new HashMap<>();
@@ -794,7 +789,7 @@ public class PrecisionImprovementFactory {
 		copyMapFromTo(typeAlias, typeAliasBK);
 		copySetFromTo(liftedVars, liftedVarsBK);
 		copyMapFromTo(signTable, signTableBK);
-		// TODO END
+		// END
 		
 		String bodyCode = "";
 		if(doBody instanceof IASTCompoundStatement) {
@@ -808,7 +803,7 @@ public class PrecisionImprovementFactory {
 		reinitializeVarMap(tempVarTable);
 		bodyCode = bodyCode.concat(insertCodeWithIndent(indentStrInner, evalCond.getFirst()));
 		
-		// TODO: restore here
+		// restore here
 		String initCode = "";
 		for(String tempVar : tempVarInScope) {
 			initCode = initCode.concat(indentStrInner).concat(mpz_t).concat(" ").concat(tempVar).concat(";\n");
@@ -833,7 +828,7 @@ public class PrecisionImprovementFactory {
 		copyMapFromTo(typeAliasBK, typeAlias);
 		copySetFromTo(liftedVarsBK, liftedVars);
 		copyMapFromTo(signTableBK, signTable);
-		// TODO END
+		// END
 		
 		newCode = newCode.concat(indentStr).concat("} while(").concat(evalCond.getSecond()).concat(");");
 		
@@ -869,7 +864,7 @@ public class PrecisionImprovementFactory {
 		newCode = newCode.concat(indentStr).concat("while(").concat(evalCond.getSecond()).concat(")\n");
 		newCode = newCode.concat(indentStr).concat("{\n");
 		
-		// TODO: backup here
+		// backup here
 		Set<String> localVariablesBK = new HashSet<>();
 		Set<String> tempVarInScopeBK = new HashSet<>();
 		Map<String, String> typeAliasBK = new HashMap<>();
@@ -884,7 +879,7 @@ public class PrecisionImprovementFactory {
 		copyMapFromTo(typeAlias, typeAliasBK);
 		copySetFromTo(liftedVars, liftedVarsBK);
 		copyMapFromTo(signTable, signTableBK);
-		// TODO END
+		// END
 		
 		String bodyCode = "";
 		if(whileBody instanceof IASTCompoundStatement) {
@@ -895,7 +890,7 @@ public class PrecisionImprovementFactory {
 		}
 		bodyCode = bodyCode.concat(insertCodeWithIndent(indentStrInner, evalCond.getFirst()));
 		
-		// TODO: restore here
+		// restore here
 		String initCode = "";
 		for(String tempVar : tempVarInScope) {
 			initCode = initCode.concat(indentStrInner).concat(mpz_t).concat(" ").concat(tempVar).concat(";\n");
@@ -920,7 +915,7 @@ public class PrecisionImprovementFactory {
 		copyMapFromTo(typeAliasBK, typeAlias);
 		copySetFromTo(liftedVarsBK, liftedVars);
 		copyMapFromTo(signTableBK, signTable);
-		// TODO END
+		// END
 		
 		newCode = newCode.concat(indentStr).concat("}");
 		
@@ -951,7 +946,7 @@ public class PrecisionImprovementFactory {
 		newCode = newCode.concat(indentStr).concat("while(").concat(evalCond.getSecond()).concat(")\n");
 		newCode = newCode.concat(indentStr).concat("{\n");
 		
-		// TODO: backup here
+		// backup here
 		Set<String> localVariablesBK = new HashSet<>();
 		Set<String> tempVarInScopeBK = new HashSet<>();
 		Map<String, String> typeAliasBK = new HashMap<>();
@@ -966,7 +961,7 @@ public class PrecisionImprovementFactory {
 		copyMapFromTo(typeAlias, typeAliasBK);
 		copySetFromTo(liftedVars, liftedVarsBK);
 		copyMapFromTo(signTable, signTableBK);
-		// TODO END
+		// END
 		
 		String bodyCode = "";
 		if(forBody instanceof IASTCompoundStatement) {
@@ -982,7 +977,7 @@ public class PrecisionImprovementFactory {
 		bodyCode = bodyCode.concat(insertCodeWithIndent(indentStrInner, evalIter.getFirst()));
 		bodyCode = bodyCode.concat(insertCodeWithIndent(indentStrInner, evalCond.getFirst()));
 		
-		// TODO: restore here
+		// restore here
 		String initCode = "";
 		for(String tempVar : tempVarInScope) {
 			initCode = initCode.concat(indentStrInner).concat(mpz_t).concat(" ").concat(tempVar).concat(";\n");
@@ -1007,7 +1002,7 @@ public class PrecisionImprovementFactory {
 		copyMapFromTo(typeAliasBK, typeAlias);
 		copySetFromTo(liftedVarsBK, liftedVars);
 		copyMapFromTo(signTableBK, signTable);
-		// TODO END
+		// END
 		
 		newCode = newCode.concat(indentStr).concat("}");
 		
@@ -1036,12 +1031,12 @@ public class PrecisionImprovementFactory {
 		// SECOND, construct the structure of if-then-else
 		// ** How about if-else if-else if-... structure? We can regard it as if statement is enclosed by else structure
 		// NOTE: else branch is optional
-		// FIXME: in order to refine organization of code, we manually add curly braces outside compound statement
+		// in order to refine organization of code, we manually add curly braces outside compound statement
 		// ** NOTE: (1) for compound statement, we should use the original indent; (2) for other statement, we should add the indent
 		newCode = newCode.concat(indentStr).concat("if(").concat(condValue).concat(")").concat("\n");
 		newCode = newCode.concat(indentStr).concat("{\n");
 		
-		// TODO: add backup code here
+		// add backup code here
 		Set<String> localVariablesBK = new HashSet<>();
 		Set<String> tempVarInScopeBK = new HashSet<>();
 		Map<String, String> typeAliasBK = new HashMap<>();
@@ -1056,7 +1051,7 @@ public class PrecisionImprovementFactory {
 		copyMapFromTo(typeAlias, typeAliasBK);
 		copySetFromTo(liftedVars, liftedVarsBK);
 		copyMapFromTo(signTable, signTableBK);
-		// TODO END
+		// END
 		
 		String thenCode = "";
 		if(thenClause instanceof IASTCompoundStatement) {
@@ -1065,7 +1060,7 @@ public class PrecisionImprovementFactory {
 		} else {
 			thenCode = thenCode.concat(handleStatement(thenClause, typeAlias, liftedVars, indent + 1)).concat("\n");
 		}
-		// TODO: add restore code here
+		// add restore code here
 		String initCode = "";
 		for(String tempVar : tempVarInScope) {
 			initCode = initCode.concat(indentInnerStr).concat(mpz_t).concat(" ").concat(tempVar).concat(";\n");
@@ -1090,13 +1085,13 @@ public class PrecisionImprovementFactory {
 		copyMapFromTo(typeAliasBK, typeAlias);
 		copySetFromTo(liftedVarsBK, liftedVars);
 		copyMapFromTo(signTableBK, signTable);
-		// TODO END
+		// END
 		
 		newCode = newCode.concat(indentStr).concat("}\n");
 		if(elseClause != null) {
 			newCode = newCode.concat(indentStr).concat("else").concat("\n");
 			newCode = newCode.concat(indentStr).concat("{\n");
-			// TODO: back up again
+			// back up again
 			copySetFromTo(localVariables, localVariablesBK);
 			localVariableStack.push(localVariablesBK);
 			localVariables.clear();
@@ -1106,7 +1101,7 @@ public class PrecisionImprovementFactory {
 			copyMapFromTo(typeAlias, typeAliasBK);
 			copySetFromTo(liftedVars, liftedVarsBK);
 			copyMapFromTo(signTable, signTableBK);
-			// TODO END
+			// END
 			
 			String elseCode = "";
 			if(elseClause instanceof IASTCompoundStatement) {
@@ -1115,7 +1110,7 @@ public class PrecisionImprovementFactory {
 			} else {
 				elseCode = elseCode.concat(handleStatement(elseClause, typeAlias, liftedVars, indent + 1)).concat("\n");
 			}
-			// TODO: restore again
+			// restore again
 			initCode = "";
 			for(String tempVar : tempVarInScope) {
 				initCode = initCode.concat(indentInnerStr).concat(mpz_t).concat(" ").concat(tempVar).concat(";\n");
@@ -1140,7 +1135,7 @@ public class PrecisionImprovementFactory {
 			copyMapFromTo(typeAliasBK, typeAlias);
 			copySetFromTo(liftedVarsBK, liftedVars);
 			copyMapFromTo(signTableBK, signTable);
-			// TODO END
+			// END
 			
 			newCode = newCode.concat(indentStr).concat("}\n");
 		}
@@ -1162,7 +1157,7 @@ public class PrecisionImprovementFactory {
 		nobrace = false; // restore to the default value. For special cases we will specify 'nobrace' to TRUE
 		
 		// First of all, we save current context information into stack and start a new one
-		// FIXME: one is responsible to maintain data backup and restore if it controls curly braces of this scope
+		// one is responsible to maintain data backup and restore if it controls curly braces of this scope
 		Set<String> localVariablesBK = new HashSet<>();
 		Set<String> tempVarInScopeBK = new HashSet<>();
 		Map<String, String> typeAliasBK = new HashMap<>();
@@ -1176,7 +1171,7 @@ public class PrecisionImprovementFactory {
 			tempVarFrozen.addAll(tempVarInScope);
 			copySetFromTo(tempVarInScope, tempVarInScopeBK);
 			tempVarInScope.clear();
-			// FIXME: we should also back up type alias and lifted variables
+			// we should also back up type alias and lifted variables
 			copyMapFromTo(typeAlias, typeAliasBK);
 			copySetFromTo(liftedVars, liftedVarsBK);
 			copyMapFromTo(signTable, signTableBK);
@@ -1235,7 +1230,7 @@ public class PrecisionImprovementFactory {
 		}
 		
 		
-		// FIXME: since 'nobrace' is a global flag, if we use the modified value through the scope of this compound statement, all other statements will be affected
+		// since 'nobrace' is a global flag, if we use the modified value through the scope of this compound statement, all other statements will be affected
 		if(!nobraceBK) {
 			// Then this bunch of statements should be braced
 			StringBuilder indentOuter = new StringBuilder("%1$").append(indent * 2 + 1).append("s");
@@ -1278,14 +1273,12 @@ public class PrecisionImprovementFactory {
 		 * We can prove: if a node in expression tree can have at most N children, it is sufficient to use (2N-1) intermediate variables (to be proved)
 		 */
 		
-		// TODO: this conclusion is not correct. Try to evaluate another upper bound or use a data structure with flexible size
-		
-		// FIXME: lifted variables should be added into this table since for now it is impossible to update the value of program variables
+		// lifted variables should be added into this table since for now it is impossible to update the value of program variables
 		// SOLUTION: rewrite the condition "tempVarMap.containsKey(opName)" as "isHighPrecisionVar(opName, tempVarMap, liftedVars)", since the sources of highly-precise value are: (1) temporary GMP integer; (2) original numerical variable
 		
 		// FIRST, convert this expression to GMP version, using DFS to traverse expression
 		// **why we ignore the second component of result? For an expression statement, the result of the top expression has no effects on program state, such as change the value of a variable.
-		// FIXME: the second component is necessary when the top expression is a function call
+		// the second component is necessary when the top expression is a function call
 		Pair<String, String> evalExpr = scanExpressionInDFS(expression, typeAlias, tempVarTable, liftedVars);
 		String newCode = evalExpr.getFirst();
 		String exprVal = evalExpr.getSecond();
@@ -1294,7 +1287,7 @@ public class PrecisionImprovementFactory {
 		// the table of temporary variable could be extended!
 		reinitializeVarMap(tempVarTable);
 		
-		// FIXME: setting up indent before returning
+		// setting up indent before returning
 		newCode = String.format(indentBuilder.toString(), "") + newCode;
 		if(expression instanceof IASTFunctionCallExpression) {
 			newCode = newCode.concat("\n").concat(String.format(indentBuilder.toString(), "")).concat(exprVal).concat(";");
@@ -1348,7 +1341,6 @@ public class PrecisionImprovementFactory {
 	 */
 	private Pair<String, String> scanExpressionInDFS(IASTExpression expression, Map<String, String> typeAlias, Map<String, Boolean> tempVarMap, Set<String> liftedVars) {
 		// handle this expression in different cases
-		// FIXME: add support on cast expression
 		if(expression instanceof IASTArraySubscriptExpression) {
 			return scanArraySubscriptExpression((IASTArraySubscriptExpression)expression, typeAlias, tempVarMap, liftedVars);
 		} else if(expression instanceof IASTBinaryExpression) {
@@ -1430,7 +1422,7 @@ public class PrecisionImprovementFactory {
 			Pair<Integer, Boolean> ltype = getFinalType(operand1, typeAlias);
 			Pair<Integer, Boolean> rtype = getFinalType(operand2, typeAlias);
 			// CASE 1: l-value is a GMP integer
-			// FIXME: in fact we should pre-process the expression before handling, for example, drop unnecessary brackets
+			// in fact we should pre-process the expression before handling, for example, drop unnecessary brackets
 			if(isHighPrecisionVar(op1Name, tempVarMap, liftedVars)) {
 				if(isHighPrecisionVar(op2Name, tempVarMap, liftedVars)) {
 					newCode = newCode.concat(String.format(mpz_set, op1Name, op2Name)).concat("; ");
@@ -1448,8 +1440,8 @@ public class PrecisionImprovementFactory {
 				}
 				recycleVars(delta1, tempVarMap);
 				
-				// TODO: if we perform p = q where p is a high precision variable, q is an expression and p is pointed by a pointer s,
-				//       we should update the ordinary version since *s can only visit ordinary variable.
+				// if we perform p = q where p is a high precision variable, q is an expression and p is pointed by a pointer s,
+				//    we should update the ordinary version since *s can only visit ordinary variable.
 				if(pointerInfo.containsValue(op1Name)) {
 					// thus we should update its ordinary variable
 					String origName = op1Name.substring(tempPfLen);
@@ -1595,7 +1587,7 @@ public class PrecisionImprovementFactory {
 							}
 						}
 						
-						// TODO: l-value is not a GMP integer, thus it can be a STAR expression. Thus, we can modify value of variable through pointer operations.
+						// l-value is not a GMP integer, thus it can be a STAR expression. Thus, we can modify value of variable through pointer operations.
 						if(operand1 instanceof IASTUnaryExpression) {
 							IASTUnaryExpression possibleStarExpr = (IASTUnaryExpression)operand1;
 							int possibleStarOperator = possibleStarExpr.getOperator();
@@ -1864,7 +1856,7 @@ public class PrecisionImprovementFactory {
 			break;
 		}
 		default: {
-			// FIXME: keep this expression
+			// keep this expression for robustness
 			newCode = "";
 			newName = expression.getRawSignature();
 		}
@@ -1900,7 +1892,7 @@ public class PrecisionImprovementFactory {
 		switch(operator) {
 		case IASTUnaryExpression.op_bracketedPrimary: {
 			// bracket does nothing on changing semantics of expression
-			// FIXME: DO NOT convert a possible integer into a GMP integer since it is a problematic operation for some expressions such as array subscript
+			// DO NOT convert a possible integer into a GMP integer since it is a problematic operation for some expressions such as array subscript
 			// NOTE: bracketed expression can be either l-value or r-value
 			newName = opName;
 			break;
@@ -1928,7 +1920,7 @@ public class PrecisionImprovementFactory {
 		}
 		case IASTUnaryExpression.op_plus: {
 			// do nothing
-			// FIXME: if possible, try to convert a non-GMP integer to GMP integer since this expression can only be r-value
+			// if possible, try to convert a non-GMP integer to GMP integer since this expression can only be r-value
 			if(isHighPrecisionVar(opName, tempVarMap, liftedVars)) {
 				newName = opName;
 			} else {
@@ -1949,7 +1941,7 @@ public class PrecisionImprovementFactory {
 			// NOTE: this expression can only be r-value
 			String newTempVar = getVar(tempVarMap);
 			if(isHighPrecisionVar(opName, tempVarMap, liftedVars)) {
-				// FIXME: we change the value of operand, if operand is a local variable, then its value is accidentally altered
+				// we change the value of operand, if operand is a local variable, then its value is accidentally altered
 				newCode = newCode.concat(String.format(mpz_set_si, newTempVar, String.format(mpz_cmp, opName, "0"))).concat("; ");
 				newName = String.format(mpz_cmp, newTempVar, "0") + " == 0 ? 1 : 0";
 			} else {
@@ -2317,7 +2309,7 @@ public class PrecisionImprovementFactory {
 		String posName = evalPos.getSecond();
 		String negName = evalNeg.getSecond();
 		
-		// FIXME: since it is possible that one of pos/neg operands is highly precise and the other is not, we should make them consistent!
+		// since it is possible that one of pos/neg operands is highly precise and the other is not, we should make them consistent!
 		// (1) if one of the operands is highly-precise, we assign a new temporary variable as the name of the whole expression;
 		// (2) otherwise, we keep the form of expression.
 		if(isHighPrecisionVar(posName, tempVarMap, liftedVars)) {
@@ -2433,7 +2425,7 @@ public class PrecisionImprovementFactory {
 		// this list consists of new names of argument expressions
 		List<String> argNames = new ArrayList<String>();
 		int index = 0;
-		// FIXME: we should make the size of paramTypes the same as funArgs, for vararg functions it seems impossible
+		// we should make the size of paramTypes the same as funArgs, for vararg functions it seems impossible
 		if(argLength > paramTypes.length) {
 			assert (funcType.takesVarArgs()) : "Non-varadic function should have a defined number of parameters!";
 			/*
@@ -2443,7 +2435,7 @@ public class PrecisionImprovementFactory {
 			 * Others: without any range check (but GMP integers should be converted to ordinary integers for function call)
 			 */
 			if(!funcNameName.equals("fprintf") && !funcNameName.equals("sprintf") && !funcNameName.equals("printf")) {
-				// TODO: ignore pre-condition check, but GMP->ordinary integer is required
+				// ignore pre-condition check, but GMP->ordinary integer is required
 				// WARNING: we should directly process function call and return in this branch!
 				for(IASTInitializerClause arg : funcArgs) {
 					IASTExpression argExpr = (IASTExpression)arg;
@@ -3013,7 +3005,7 @@ public class PrecisionImprovementFactory {
 		if(isHighPrecisionVar(op1Name, tempVarMap, liftedVars)) {
 			newTempVar = getVar(tempVarMap);
 			if(isHighPrecisionVar(op2Name, tempVarMap, liftedVars)) {
-				// FIXME: modifying an operand directly is incorrect if this operand is a local variable.
+				// modifying an operand directly is incorrect if this operand is a local variable.
 				addCode = addCode.concat(generateBinaryOperation(newTempVar, op1Name, op2Name, optrString)).concat("; ");
 				addName = newTempVar;
 			} else {
@@ -3139,7 +3131,7 @@ public class PrecisionImprovementFactory {
 			}
 			
 			// NOTE: since the left side is a left-value, it is impossible to be a temporary variable
-			// TODO: Temporary variables are used to represent intermediate results, these results are undoubtfully r-value
+			// Temporary variables are used to represent intermediate results, these results are undoubtfully r-value
 			if(isPlus) {
 				addCode = addCode.concat(String.format(mpz_add, leftName, leftName, rightName)).concat("; ");
 			} else {
@@ -3195,7 +3187,7 @@ public class PrecisionImprovementFactory {
 			// check whether right operand is a temporary variable
 			if(isHighPrecisionVar(op2Name, tempVarMap, liftedVars)) {
 				// GMP integer, let us convert it into SIGNED_LONG to enable negative pointer arithmetic
-				// FIXME: we should not only assert a constraint on offset, but also on the whole value!
+				// we should not only assert a constraint on offset, but also on the whole value!
 				if(rsign == false && rtype.getFirst() == 8) {
 					if(isPlus) {
 						addCode = addCode.concat(String.format(check_pointer_plus_ul, op1Name, String.format(check_gmp_ulong, op2Name))).concat("; ");
@@ -3319,7 +3311,7 @@ public class PrecisionImprovementFactory {
 					} else {
 						addCode = addCode.concat(String.format(mpz_sub, newTempVar, newTempVar, newTempVar2)).concat("; ");
 					}
-					// FIXME: recycle wrong variable
+					// recycle wrong variable
 					recycleVar(newTempVar2, tempVarMap);
 				}
 				addName = newTempVar;
@@ -3330,7 +3322,7 @@ public class PrecisionImprovementFactory {
 	
 	private Pair<String, String> handleLogicalArithmetic(IASTExpression operand1, IASTExpression operand2, String op1Name, String op2Name,
 			Map<String, Boolean> tempVarMap, Set<String> liftedVars, Map<String, String> typeAlias, String optrString) {
-		// FIXME: maybe we can do better if we improve our heuristic
+		// TODO: maybe we can do better if we improve our heuristic
 		String addCode = "";
 		String addName = "";
 		Pair<Integer, Boolean> ltype = getFinalType(operand1, typeAlias);
@@ -3375,7 +3367,7 @@ public class PrecisionImprovementFactory {
 			Map<String, Boolean> tempVarMap, Set<String> liftedVars, Map<String, String> typeAlias, String optrString) {
 		// We can handle other predicate operations similarly
 		// ATTENTION! operand can be numerical numbers or POINTERS! In gcc, pointers can be implicitly casted to a number of long type
-		// FIXME: address the issue when two operands are not numerical values.
+		// address the issue when two operands are not numerical values.
 		String addCode = "";
 		String addName = "";
 		Pair<Integer, Boolean> ltype = getFinalType(operand1, typeAlias);
@@ -3670,7 +3662,7 @@ public class PrecisionImprovementFactory {
 		String[] words = typeString.split(" ");
 		int startIndex = 0;
 		
-		// FIXME: remove qualifiers from type string
+		// remove qualifiers from type string
 		words = deleteQualifier(words);
 		
 		if(words.length == 0) {
@@ -3725,7 +3717,7 @@ public class PrecisionImprovementFactory {
 	}
 	
 	private String[] getMapDelta(Map<String, Boolean> after, Map<String, Boolean> before) {
-		// FIXME: since map of temporary variables is flexible, we assume that key set of "before" is the subset of key set of "after"
+		// since map of temporary variables is flexible, we assume that key set of "before" is the subset of key set of "after"
 		List<String> delta = new ArrayList<String>();
 		for(String key : after.keySet()) {
 			// if some entries in "after" are not in "before", get method will return null
@@ -3750,7 +3742,7 @@ public class PrecisionImprovementFactory {
 		for(Entry<String, Boolean> entry : varTable.entrySet()) {
 			if(entry.getValue() == true) {
 				String newVar = entry.getKey();
-				// FIXME: add inconsistent check here!
+				// add inconsistent check here!
 				if(tempVarFrozen.contains(newVar)) {
 					continue;
 				}
@@ -3780,7 +3772,7 @@ public class PrecisionImprovementFactory {
 			String key = entry.getKey();
 			varTable.put(key, true);
 		}
-		// TODO: add variable freezing to prevent potential memory leak
+		// add variable freezing to prevent potential memory leak
 		for(String frozenVar : tempVarFrozen) {
 			varTable.put(frozenVar, false);
 		}
@@ -3821,9 +3813,9 @@ public class PrecisionImprovementFactory {
 				typeAlias.put(alias, originType);
 				return declNode.getRawSignature();
 			} else {
-				// FIXME: we keep global declarations
+				// we keep global declarations
 				if(isGlobal) {
-					// FIXME: return raw signature will keep some preprocessing garbage in the code, which is undesirable
+					// return raw signature will keep some preprocessing garbage in the code, which is undesirable
 					/*
 					 * How to eliminate preprocessing flags in the code?
 					 * - For example, NULL is defined in stdlib.h. If we preprocess the code, NULL will be replaced with ((void*)0) surrounding with some preprocessing
@@ -3860,7 +3852,7 @@ public class PrecisionImprovementFactory {
 				return declNode.getRawSignature();
 			} else {
 				if(isGlobal) {
-					// FIXME: try to eliminate preprocessing directives
+					// try to eliminate preprocessing directives
 					String declString = "";
 					String specString = specifier.getRawSignature();
 					for(IASTDeclarator declarator : declarators) {
@@ -3946,7 +3938,7 @@ public class PrecisionImprovementFactory {
 		}
 	}
 	
-	// FIXME: removeDeclarators is necessary only when handling local declarations
+	// removeDeclarators is necessary only when handling local declarations
 	private void removeDeclarators(IASTDeclarator[] declarators, Set<String> liftedVars) {
 		for(IASTDeclarator declarator : declarators) {
 			String declName = declarator.getName().getRawSignature();
@@ -3963,7 +3955,7 @@ public class PrecisionImprovementFactory {
 		boolean intSpec = true;
 		if(isNotIntegerSpecifier(specifier)) {
 			// keep the original code
-			// FIXME: If we allocate a dynamic array of non-integer type??
+			// If we allocate a dynamic array of non-integer type??
 			removeDeclarators(declarators, liftedVars);
 			intSpec = false;
 		}
@@ -3998,7 +3990,7 @@ public class PrecisionImprovementFactory {
 					 * (3) ICASTDesignatedInitializer, which has the form of ``.x=4". It is often used to initialize struct object.
 					 */
 					assert (initializer instanceof IASTEqualsInitializer);
-					// FIXME: in C99/C11, the initializer is not required to be a constant expression, that means we can use arbitrary type of expression
+					// in C99/C11, the initializer is not required to be a constant expression, that means we can use arbitrary type of expression
 					//        to initialize certain variable. Then, we should evaluate this expression first
 					// PROBLEM: what will happen if the initializer overflows? Don't worry, although at initial the value of original variable is abnormal,
 					//          when we are about to use it (mostly on ampersand operation), we will copy the precise value from GMP version of integer, 
@@ -4040,7 +4032,7 @@ public class PrecisionImprovementFactory {
 				String codeLine = specifier.getRawSignature() + " " + declarator.getName().getRawSignature() + "; ";
 				newCode = newCode.concat(codeLine);	
 				
-				// FIXME: add sign info 
+				// add sign info 
 				Pair<Integer, Boolean> specType = getFinalType(specifier, typeAlias);
 				signTable.put(newName, specType.getSecond());
 				
@@ -4154,10 +4146,10 @@ public class PrecisionImprovementFactory {
 				String initValue = "0";
 				if(initializer != null) {
 					assert (initializer instanceof IASTEqualsInitializer);
-					// FIXME: the right-hand value must be literal expression, try to get its value
+					// the right-hand value must be literal expression, try to get its value
 					IASTInitializerClause initLiteral = ((IASTEqualsInitializer)initializer).getInitializerClause();
 					if(!(initLiteral instanceof IASTExpression)) {
-						// FIXME: how to handle this case?
+						// how to handle this case?
 						newCode = newCode.concat(declNode.getRawSignature()).concat("; ");
 						return newCode;
 					}
@@ -4318,7 +4310,7 @@ public class PrecisionImprovementFactory {
 	
 	private boolean isNotIntegerSpecifier(IASTSimpleDeclSpecifier spec) {
 		String typeString = spec.getRawSignature();
-		// FIXME: the original implementation is problematic
+		// the original implementation is problematic
 		Pair<Integer, Boolean> typeInfo = getTypeDetailedInfo(typeString);
 		int length = typeInfo.getFirst();
 		if(length != -1) {
@@ -4341,7 +4333,7 @@ public class PrecisionImprovementFactory {
 	}
 	
 	private String destroyGenerate(String indentStr) {
-		// FIXME: besides them, we should destroy GMP variables in current scope, too!!
+		// besides them, we should destroy GMP variables in current scope, too!!
 		Set<String> totalLocalVarSet = new HashSet<>();
 		
 		for(Set<String> localVars : localVariableStack) {
@@ -4724,7 +4716,6 @@ public class PrecisionImprovementFactory {
 		}
 		
 		private void CReader() {
-			// FIXME: we assume that user has processed the code...
 			
 			File IFile = new File(inputIFileName);
 			if(!IFile.exists()) {
