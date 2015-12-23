@@ -13,7 +13,7 @@ OS: Linux distributions
 
 Eclipse CDT (version 8.8 is tested)
 
-libgmp (You can install it from source code or software repositories, GMP 6.0.0 and later is recommanded)
+libgmp (You can install it from source code or software repositories, GMP 6.0.0 o later is recommanded)
 
 gcc (gcc 5.2.1 is tested) or clang (clang 3.6.2 is tested)
 
