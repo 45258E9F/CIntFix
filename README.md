@@ -43,6 +43,19 @@ Notice that you should specify correct include files or folders for correct anal
 
 **4.** Enjoy the fixed program now!
 
+Performance Measurement
+-----------------------
+
+**1.** **Code generation time:** This is available as the output of `IntErrorFix`. You can see something like the following line:
+
+    Total transformation time: 614
+    
+Here the message shows that it takes 614 milliseconds to perform the code transformation.
+
+**2.** **Program runtime:** We use `time` to measure program runtime. If you need a more precise timer, you can check out `clock_gettime()`, a POSIX interface to get the current time in nanoseconds.
+
+**3.** **Line number:** We recommend to use `cloc` to count lines of code. Note that KLOC used in the paper does not include comments and blanks.
+
 DataSet
 -------
 
