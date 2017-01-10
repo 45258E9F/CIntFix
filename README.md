@@ -64,3 +64,5 @@ Juliet Test Suite v1.2 can be found at https://samate.nist.gov/SRD/testsuite.php
 SPEC 2000 benchmark is a commerical benchmark.
 
 The reference result (updated on Aug. 2016) is here.
+
+The detailed data of the investigation on real-world integer errors from CVE database is available here.
