@@ -2,13 +2,11 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <limits.h>
-#include <gmp.h>
+#include <flint/fmpz.h>
 
-unsigned int __CHECK_GMP_UINT(mpz_t op)
+unsigned int __CHECK_GMP_UINT(fmpz_t op)
 {
-  int flag = 0;
-  flag = mpz_fits_uint_p(op);
-  if(flag == 0)
+  if(fmpz_cmp_ui(op, UINT_MIN) < 0 || fmpz_cmp_ui(op, UINT_MAX) > 0)
   {
 #ifdef PRESSURE_TEST
 	return DIRTY_VALUE;
@@ -16,14 +14,12 @@ unsigned int __CHECK_GMP_UINT(mpz_t op)
     __CINTFIX_ERROR("ERROR! (failed check: __CHECK_GMP_UINT)\n");
 #endif
   }
-  return ((unsigned int)mpz_get_ui(op));
+  return ((unsigned int)fmpz_get_ui(op));
 }
 
-int __CHECK_GMP_INT(mpz_t op)
+int __CHECK_GMP_INT(fmpz_t op)
 {
-  int flag = 0;
-  flag = mpz_fits_sint_p(op);
-  if(flag == 0)
+  if(fmpz_cmp_si(op, INT_MIN) < 0 || fmpz_cmp_si(op, INT_MAX) > 0)
   {
 #ifdef PRESSURE_TEST
 	return DIRTY_VALUE;
@@ -31,14 +27,12 @@ int __CHECK_GMP_INT(mpz_t op)
     __CINTFIX_ERROR("ERROR! (failed check: __CHECK_GMP_INT)\n");
 #endif
   }
-  return ((int)mpz_get_si(op));
+  return ((int)fmpz_get_si(op));
 }
 
-unsigned long __CHECK_GMP_ULONG(mpz_t op)
+unsigned long __CHECK_GMP_ULONG(fmpz_t op)
 {
-  int flag = 0;
-  flag = mpz_fits_ulong_p(op);
-  if(flag == 0)
+  if(fmpz_cmp_ui(op, ULONG_MIN) < 0 || fmpz_cmp_ui(op, ULONG_MAX) > 0)
   {
 #ifdef PRESSURE_TEST
 	return DIRTY_VALUE;
@@ -46,14 +40,12 @@ unsigned long __CHECK_GMP_ULONG(mpz_t op)
     __CINTFIX_ERROR("ERROR! (failed check: __CHECK_GMP_ULONG)\n");
 #endif
   }
-  return ((unsigned long)mpz_get_ui(op));
+  return ((unsigned long)fmpz_get_ui(op));
 }
 
-long __CHECK_GMP_SLONG(mpz_t op)
+long __CHECK_GMP_SLONG(fmpz_t op)
 {
-  int flag = 0;
-  flag = mpz_fits_slong_p(op);
-  if(flag == 0)
+  if(fmpz_cmp_si(op, LONG_MIN) < 0 || fmpz_cmp_si(op, LONG_MAX) > 0)
   {
 #ifdef PRESSURE_TEST
 	return DIRTY_VALUE;
@@ -61,14 +53,12 @@ long __CHECK_GMP_SLONG(mpz_t op)
     __CINTFIX_ERROR("ERROR! (failed check: __CHECK_GMP_SLONG)\n");
 #endif
   }
-  return ((long)mpz_get_si(op));
+  return ((long)fmpz_get_si(op));
 }
 
-unsigned short __CHECK_GMP_USHORT(mpz_t op)
+unsigned short __CHECK_GMP_USHORT(fmpz_t op)
 {
-  int flag = 0;
-  flag = mpz_fits_ushort_p(op);
-  if(flag == 0)
+  if(fmpz_cmp_ui(op, USHRT_MIN) < 0 || fmpz_cmp_ui(op, USHRT_MAX) > 0)
   {
 #ifdef PRESSURE_TEST
 	return DIRTY_VALUE;
@@ -76,14 +66,12 @@ unsigned short __CHECK_GMP_USHORT(mpz_t op)
     __CINTFIX_ERROR("ERROR! (failed check: __CHECK_GMP_USHORT)\n");
 #endif
   }
-  return ((unsigned short)mpz_get_ui(op));
+  return ((unsigned short)fmpz_get_ui(op));
 }
 
-short __CHECK_GMP_SSHORT(mpz_t op)
+short __CHECK_GMP_SSHORT(fmpz_t op)
 {
-  int flag = 0;
-  flag = mpz_fits_sshort_p(op);
-  if(flag == 0)
+  if(fmpz_cmp_si(op, SHRT_MIN) < 0 || fmpz_cmp_si(op, SHRT_MAX) > 0)
   {
 #ifdef PRESSURE_TEST
 	return DIRTY_VALUE;
@@ -91,16 +79,14 @@ short __CHECK_GMP_SSHORT(mpz_t op)
     __CINTFIX_ERROR("ERROR! (failed check: __CHECK_GMP_SSHORT)\n");
 #endif  
   }
-  return ((short)mpz_get_si(op));
+  return ((short)fmpz_get_si(op));
 }
 
-unsigned char __CHECK_GMP_UCHAR(mpz_t op)
+unsigned char __CHECK_GMP_UCHAR(fmpz_t op)
 {
-  int min_cmp = mpz_cmp_si(op, 0);
-  int max_cmp = mpz_cmp_si(op, 255);
-  if(min_cmp >= 0 && max_cmp <= 0)
+  if(fmpz_cmp_ui(op, UCHAR_MIN) < 0 || fmpz_cmp_ui(op, UCHAR_MAX) > 0)
   {
-    return ((unsigned char)mpz_get_ui(op));
+    return ((unsigned char)fmpz_get_ui(op));
   }
   else
   {
@@ -112,13 +98,11 @@ unsigned char __CHECK_GMP_UCHAR(mpz_t op)
   }
 }
 
-char __CHECK_GMP_SCHAR(mpz_t op)
+char __CHECK_GMP_SCHAR(fmpz_t op)
 {
-  int min_cmp = mpz_cmp_si(op, -128);
-  int max_cmp = mpz_cmp_si(op, 127);
-  if(min_cmp >= 0 && max_cmp <= 0)
+  if(fmpz_cmp_si(op, CHAR_MIN) < 0 || fmpz_cmp_si(op, CHAR_MAX) > 0)
   {
-    return ((char)mpz_get_si(op));
+    return ((char)fmpz_get_si(op));
   }
   else
   {

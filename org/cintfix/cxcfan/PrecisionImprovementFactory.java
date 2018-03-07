@@ -106,27 +106,27 @@ public class PrecisionImprovementFactory {
 	private static final String tempPrefix = "__HIGHPREC_INTERM_";
 	private static final int tempPfLen = prefix.length();
 	
-	private static final String mpz_t = "mpz_t"; // GMP BigInteger type
-	private static final String mpz_init = "mpz_init(%s); ";
-	private static final String mpz_clear = "mpz_clear(%s); ";
-	private static final String mpz_set_ui = "mpz_set_ui(%s, %s)";
-	private static final String mpz_set_si = "mpz_set_si(%s, %s)";
-	private static final String mpz_set_str = "mpz_set_str(%s, %s, %s)";
-	private static final String mpz_set = "mpz_set(%s, %s)";
-	private static final String mpz_cmp = "mpz_cmp(%s, %s)";
-	private static final String mpz_cmp_si = "mpz_cmp_si(%s, %s)";
-	private static final String mpz_add = "mpz_add(%s, %s, %s)";
-	private static final String mpz_sub = "mpz_sub(%s, %s, %s)";
-	private static final String mpz_mul = "mpz_mul(%s, %s, %s)";
-	private static final String mpz_tdiv_q = "mpz_tdiv_q(%s, %s, %s)"; // div
-	private static final String mpz_tdiv_r = "mpz_tdiv_r(%s, %s, %s)"; // mod
+	private static final String mpz_t = "fmpz_t"; // Flint multi-precision integer type
+	private static final String mpz_init = "fmpz_init(%s); ";
+	private static final String mpz_clear = "fmpz_clear(%s); ";
+	private static final String mpz_set_ui = "fmpz_set_ui(%s, %s)";
+	private static final String mpz_set_si = "fmpz_set_si(%s, %s)";
+	private static final String mpz_set_str = "fmpz_set_str(%s, %s, %s)";
+	private static final String mpz_set = "fmpz_set(%s, %s)";
+	private static final String mpz_cmp = "fmpz_cmp(%s, %s)";
+	private static final String mpz_cmp_si = "fmpz_cmp_si(%s, %s)";
+	private static final String mpz_add = "fmpz_add(%s, %s, %s)";
+	private static final String mpz_sub = "fmpz_sub(%s, %s, %s)";
+	private static final String mpz_mul = "fmpz_mul(%s, %s, %s)";
+	private static final String mpz_tdiv_q = "fmpz_tdiv_q(%s, %s, %s)"; // div
+	private static final String mpz_tdiv_r = "fmpz_tdiv_qr(%s, %s, %s, %s)"; // mod is at the 2nd place
 	// bit-shift operation should be with great care! Negative shift is prohibited.
 	// the third parameter is of type mp_bitcnt_t, which is equivalent to unsigned long now.
-	private static final String mpz_mul_2exp = "mpz_mul_2exp(%s, %s, %s)"; // left-shift
-	private static final String mpz_fdiv_q_2exp = "mpz_fdiv_q_2exp(%s, %s, %s)"; // right-shift
+	private static final String mpz_mul_2exp = "fmpz_mul_2exp(%s, %s, %s)"; // left-shift
+	private static final String mpz_fdiv_q_2exp = "fmpz_fdiv_q_2exp(%s, %s, %s)"; // right-shift
 	private static final String mpz_neg = "mpz_neg(%s, %s)";
-	private static final String mpz_add_ui = "mpz_add_ui(%s, %s, %s)";
-	private static final String mpz_sub_ui = "mpz_sub_ui(%s, %s, %s)";
+	private static final String mpz_add_ui = "fmpz_add_ui(%s, %s, %s)";
+	private static final String mpz_sub_ui = "fmpz_sub_ui(%s, %s, %s)";
 	
 	// __CHECK_GMP_UINT(mpz_t);
 	private static final String check_gmp_uint = "__CHECK_GMP_UINT(%s)"; // use mpz_fits_* function first, then use mpz_get_* function to restore its value
@@ -2847,9 +2847,9 @@ public class PrecisionImprovementFactory {
 		}
 		
 		if(leftHP) {
-			addCode = addCode.concat(generateBinaryOperation(op1Name, op1Name, rightOp, optrString)).concat("; ");
+			addCode = addCode.concat(generateBinaryOperation(op1Name, op1Name, rightOp, optrString, tempVarMap)).concat("; ");
 		} else {
-			addCode = addCode.concat(generateBinaryOperation(newTempVar, newTempVar, rightOp, optrString)).concat("; ");
+			addCode = addCode.concat(generateBinaryOperation(newTempVar, newTempVar, rightOp, optrString, tempVarMap)).concat("; ");
 			// newTempVar should be cast to the left operand op1Name
 			boolean lsign = ltype.getSecond();
 			int llength = ltype.getFirst();
@@ -2894,7 +2894,7 @@ public class PrecisionImprovementFactory {
 		if(isHighPrecisionVar(op1Name, tempVarMap, liftedVars)) {
 			newTempVar = getVar(tempVarMap);
 			if(isHighPrecisionVar(op2Name, tempVarMap, liftedVars)) {
-				addCode = addCode.concat(generateBinaryOperation(newTempVar, op1Name, op2Name, optrString)).concat("; ");
+				addCode = addCode.concat(generateBinaryOperation(newTempVar, op1Name, op2Name, optrString, tempVarMap)).concat("; ");
 				addName = newTempVar;
 			} else {
 				if((rtype.getSecond() == false && rtype.getFirst() == 8) || rtype.getFirst() == -1) {
@@ -2902,7 +2902,7 @@ public class PrecisionImprovementFactory {
 				} else {
 					addCode = addCode.concat(String.format(mpz_set_si, newTempVar, op2Name)).concat("; ");
 				}
-				addCode = addCode.concat(generateBinaryOperation(newTempVar, op1Name, newTempVar, optrString)).concat("; ");
+				addCode = addCode.concat(generateBinaryOperation(newTempVar, op1Name, newTempVar, optrString, tempVarMap)).concat("; ");
 				addName = newTempVar;
 			}
 		} else {
@@ -2919,7 +2919,7 @@ public class PrecisionImprovementFactory {
 			} else {
 				rightOp = String.format(check_ulong, op2Name, rsign);
 			}
-			addCode = addCode.concat(generateBinaryOperation(newTempVar, newTempVar, rightOp, optrString)).concat("; ");
+			addCode = addCode.concat(generateBinaryOperation(newTempVar, newTempVar, rightOp, optrString, tempVarMap)).concat("; ");
 			addName = newTempVar;
 		}
 
@@ -2938,7 +2938,7 @@ public class PrecisionImprovementFactory {
 		if(isHighPrecisionVar(op1Name, tempVarMap, liftedVars)) {
 			// Then the final result can be directly assigned to GMP integer
 			if(isHighPrecisionVar(op2Name, tempVarMap, liftedVars)) {
-				addCode = addCode.concat(generateBinaryOperation(op1Name, op1Name, op2Name, optrString)).concat("; ");
+				addCode = addCode.concat(generateBinaryOperation(op1Name, op1Name, op2Name, optrString, tempVarMap)).concat("; ");
 			} else {
 				rightName = getVar(tempVarMap);
 				if((rtype.getSecond() == false && rtype.getFirst() == 8) || rtype.getFirst() == -1) {
@@ -2946,7 +2946,7 @@ public class PrecisionImprovementFactory {
 				} else {
 					addCode = addCode.concat(String.format(mpz_set_si, rightName, op2Name)).concat("; ");
 				}
-				addCode = addCode.concat(generateBinaryOperation(op1Name, op1Name, rightName, optrString)).concat("; ");
+				addCode = addCode.concat(generateBinaryOperation(op1Name, op1Name, rightName, optrString, tempVarMap)).concat("; ");
 				recycleVar(rightName, tempVarMap);
 			}
 		} else {
@@ -2959,7 +2959,7 @@ public class PrecisionImprovementFactory {
 				addCode = addCode.concat(String.format(mpz_set_si, leftName, op1Name)).concat("; ");
 			}
 			if(isHighPrecisionVar(op2Name, tempVarMap, liftedVars)) {
-				addCode = addCode.concat(generateBinaryOperation(leftName, leftName, op2Name, optrString)).concat("; ");
+				addCode = addCode.concat(generateBinaryOperation(leftName, leftName, op2Name, optrString, tempVarMap)).concat("; ");
 			} else {
 				rightName = getVar(tempVarMap);
 				if((rtype.getSecond() == false && rtype.getFirst() == 8) || rtype.getFirst() == -1) {
@@ -2967,7 +2967,7 @@ public class PrecisionImprovementFactory {
 				} else {
 					addCode = addCode.concat(String.format(mpz_set_si, rightName, op2Name)).concat("; ");
 				}
-				addCode = addCode.concat(generateBinaryOperation(leftName, leftName, rightName, optrString)).concat("; ");
+				addCode = addCode.concat(generateBinaryOperation(leftName, leftName, rightName, optrString, tempVarMap)).concat("; ");
 				recycleVar(rightName, tempVarMap);
 			}
 			
@@ -3012,7 +3012,7 @@ public class PrecisionImprovementFactory {
 			newTempVar = getVar(tempVarMap);
 			if(isHighPrecisionVar(op2Name, tempVarMap, liftedVars)) {
 				// FIXME: modifying an operand directly is incorrect if this operand is a local variable.
-				addCode = addCode.concat(generateBinaryOperation(newTempVar, op1Name, op2Name, optrString)).concat("; ");
+				addCode = addCode.concat(generateBinaryOperation(newTempVar, op1Name, op2Name, optrString, tempVarMap)).concat("; ");
 				addName = newTempVar;
 			} else {
 				if((rtype.getSecond() == false && rtype.getFirst() == 8) || rtype.getFirst() == -1) {
@@ -3020,7 +3020,7 @@ public class PrecisionImprovementFactory {
 				} else {
 					addCode = addCode.concat(String.format(mpz_set_si, newTempVar, op2Name)).concat("; ");
 				}
-				addCode = addCode.concat(generateBinaryOperation(newTempVar, op1Name, newTempVar, optrString)).concat("; ");
+				addCode = addCode.concat(generateBinaryOperation(newTempVar, op1Name, newTempVar, optrString, tempVarMap)).concat("; ");
 				addName = newTempVar;
 			}
 		} else {
@@ -3031,7 +3031,7 @@ public class PrecisionImprovementFactory {
 				addCode = addCode.concat(String.format(mpz_set_si, newTempVar, op1Name)).concat("; ");
 			}
 			if(isHighPrecisionVar(op2Name, tempVarMap, liftedVars)) {
-				addCode = addCode.concat(generateBinaryOperation(newTempVar, newTempVar, op2Name, optrString)).concat("; ");
+				addCode = addCode.concat(generateBinaryOperation(newTempVar, newTempVar, op2Name, optrString, tempVarMap)).concat("; ");
 				addName = newTempVar;
 			} else {
 				newTempVar2 = getVar(tempVarMap);
@@ -3040,7 +3040,7 @@ public class PrecisionImprovementFactory {
 				} else {
 					addCode = addCode.concat(String.format(mpz_set_si, newTempVar2, op2Name)).concat("; ");
 				}
-				addCode = addCode.concat(generateBinaryOperation(newTempVar, newTempVar, newTempVar2, optrString)).concat("; ");
+				addCode = addCode.concat(generateBinaryOperation(newTempVar, newTempVar, newTempVar2, optrString, tempVarMap)).concat("; ");
 				addName = newTempVar;
 				recycleVar(newTempVar2, tempVarMap);
 			}
@@ -3049,13 +3049,16 @@ public class PrecisionImprovementFactory {
 		return Pair.of(addCode, addName);
 	}
 	
-	private String generateBinaryOperation(String opr, String op1, String op2, String optr) {
+	private String generateBinaryOperation(String opr, String op1, String op2, String optr, Map<String, Boolean> tempVarMap) {
 		if(optr.equals("*")) {
 			return String.format(mpz_mul, opr, op1, op2);
 		} else if(optr.equals("/")) {
 			return String.format(mpz_tdiv_q, opr, op1, op2);
 		} else if(optr.equals("%")) {
-			return String.format(mpz_tdiv_r, opr, op1, op2);
+			// the first operand is the division result which should be ignored
+			String tempVar = getVar(tempVarMap);
+			recycleVar(tempVar, tempVarMap);
+			return String.format(mpz_tdiv_r, tempVar, opr, op1, op2);
 		} else if(optr.equals("<<")) {
 			return String.format(mpz_mul_2exp, opr, op1, op2);
 		} else {
